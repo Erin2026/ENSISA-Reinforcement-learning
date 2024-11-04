@@ -1,0 +1,3 @@
+pip install gym[toy_text]==0.26.2
+pip install numpy==1.24.4
+pip install matplotlib==3.7.3
