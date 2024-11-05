@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     gamma = 0.8 # choose your own
 
-    epsilon = 0.01 # choose your own
+    epsilon = 0. # choose your own
 
     n_epochs = 10000 # choose your own
     max_itr_per_epoch = 100 # choose your own
@@ -70,8 +70,11 @@ if __name__ == "__main__":
             Q = update_q_table(
                 Q=Q, s=S, a=A, r=R, sprime=Sprime, alpha=alpha, gamma=gamma
             )
-            S=Sprime
+            
             # Update state and put a stoping criteria
+            S=Sprime
+            if done:
+                break
 
 
         print("episode #", e, " : r = ", r/(max_itr_per_epoch))
