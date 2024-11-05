@@ -14,14 +14,10 @@ def update_q_table(Q, s, a, r, sprime, alpha, gamma):
     Return the same input Q but updated for the pair s and a.
     """
     #recherche du maximum de Q[sprime][aprime]-Q[s][a]
-    aprime = Q[s][1]
-    for ap in Q[s]:
-        if aprime<ap:
-            aprime==ap
+    aprime = np.argmax(Q[sprime])
 
     #application de la fonction
-    Q[s][a] = Q[s][a]+alpha(r+gamma*max(Q[sprime][aprime]-Q[s][a]))
-    print(Q)
+    Q[s][a] = Q[s][a]+alpha*(r+gamma*Q[sprime][aprime]-Q[s][a])
     return Q
 
 
@@ -33,29 +29,31 @@ def epsilon_greedy(Q, s, epsilone):
     """
 
     randint=rd.randint(0,5)
-    a=Q[s][randint]
     random_number = rd.random()
     if random_number<epsilone:
-        a=Q[s][randint]
+        a=randint
+    else:
+        a=np.argmax(Q[s])
     return a
 
 if __name__ == "__main__":
-    env = gym.make("Taxi-v3", render_mode="human")
+    env = gym.make("Taxi-v3", render_mode="rgb_array")
 
     env.reset()
     env.render()
 
     Q = np.zeros([env.observation_space.n, env.action_space.n])
 
-    alpha = 0.01 # choose your own
+    alpha = 0.1 # choose your own
 
     gamma = 0.8 # choose your own
 
-    epsilon = 0.2 # choose your own
+    epsilon = 0.01 # choose your own
 
-    n_epochs = 20 # choose your own
+    n_epochs = 10000 # choose your own
     max_itr_per_epoch = 100 # choose your own
     rewards = []
+    episodes=[]
 
     for e in range(n_epochs):
         r = 0
@@ -72,14 +70,18 @@ if __name__ == "__main__":
             Q = update_q_table(
                 Q=Q, s=S, a=A, r=R, sprime=Sprime, alpha=alpha, gamma=gamma
             )
-
+            S=Sprime
             # Update state and put a stoping criteria
 
-        print("episode #", e, " : r = ", r)
 
-        rewards.append(r)
+        print("episode #", e, " : r = ", r/(max_itr_per_epoch))
+        episodes.append(e)
+        rewards.append(r/(max_itr_per_epoch))
 
     print("Average reward = ", np.mean(rewards))
+    plt.figure()
+    plt.plot(episodes,rewards)
+    plt.show()
 
     # plot the rewards in function of epochs
 
