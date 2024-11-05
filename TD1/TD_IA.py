@@ -36,6 +36,7 @@ def policy_evaluation(n,pi,v,Gamma,threshold):
     This function should return the value function that follows the policy pi.
     Use the stopping criteria given in the problem statement.
   """
+
   while True:
         delta = 0
         for i in range(n):
@@ -45,13 +46,17 @@ def policy_evaluation(n,pi,v,Gamma,threshold):
                 action = pi[i, j]
                 direction = policy_one_step_look_ahead[action]
                 ni, nj = i + direction[0], j + direction[1]
+                # Check if next state is within the grid bounds
                 if 0 <= ni < n and 0 <= nj < n:
                     v_new = -1 + Gamma * v[ni, nj]
-                    delta = max(delta, abs(v[i, j] - v_new))
-                    v[i, j] = v_new
+                else:
+                    v_new = -10  # If out of bounds, assume a penalty step
+                delta = max(delta, abs(v[i, j] - v_new))
+                v[i, j] = v_new
         if delta < threshold:
             break
   return v
+          
 
 def policy_improvement(n,pi,v,Gamma):
   """
@@ -63,7 +68,7 @@ def policy_improvement(n,pi,v,Gamma):
       return new_pi, True if new_pi = pi for all states
       else return new_pi, False
   """
-  policy_stable = False
+  policy_stable = True
   for i in range(n):
       for j in range(n):
           if (i == 0 and j == 0) or (i == n - 1 and j == n - 1):
@@ -72,12 +77,18 @@ def policy_improvement(n,pi,v,Gamma):
           action_values = []
           for action, direction in policy_one_step_look_ahead.items():
               ni, nj = i + direction[0], j + direction[1]
+
+              # Check if next state is within the grid bounds
               if 0 <= ni < n and 0 <= nj < n:
                   action_values.append((-1 + Gamma * v[ni, nj], action))
-          best_action = max(action_values)
+              else:
+                  action_values.append((-10, action))  # Assume penalty for out-of-bounds
+
+          # Select the action with the highest value
+          best_value, best_action = max(action_values)
           pi[i, j] = best_action
-          if best_action == old_action:
-              policy_stable = True
+          if best_action != old_action:
+              policy_stable = False
   return pi, policy_stable
   
 
