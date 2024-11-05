@@ -36,8 +36,14 @@ def epsilon_greedy(Q, s, epsilone):
         a=np.argmax(Q[s])
     return a
 
+def eps(b):
+    Y=[]
+    for x in range(b):
+        Y.append(np.exp(-x/30))
+    return Y
+
 if __name__ == "__main__":
-    env = gym.make("Taxi-v3", render_mode="rgb_array")
+    env = gym.make("Taxi-v3", render_mode="human")
 
     env.reset()
     env.render()
@@ -48,19 +54,21 @@ if __name__ == "__main__":
 
     gamma = 0.8 # choose your own
 
-    epsilon = 0. # choose your own
+    
 
-    n_epochs = 10000 # choose your own
-    max_itr_per_epoch = 100 # choose your own
+    n_epochs = 1000 # choose your own
+    max_itr_per_epoch = 1000 # choose your own
     rewards = []
     episodes=[]
 
+    Epsilon = eps(n_epochs) # choose your own
     for e in range(n_epochs):
         r = 0
-
+        epsilon = Epsilon[e]
         S, _ = env.reset()
+        moves = 0
 
-        for _ in range(max_itr_per_epoch):
+        for i in range(max_itr_per_epoch):
             A = epsilon_greedy(Q=Q, s=S, epsilone=epsilon)
 
             Sprime, R, done, _, info = env.step(A)
@@ -70,16 +78,16 @@ if __name__ == "__main__":
             Q = update_q_table(
                 Q=Q, s=S, a=A, r=R, sprime=Sprime, alpha=alpha, gamma=gamma
             )
-            
+            moves = i
             # Update state and put a stoping criteria
             S=Sprime
             if done:
                 break
 
 
-        print("episode #", e, " : r = ", r/(max_itr_per_epoch))
+        print("episode #", e, " : r = ", r, "Nombre de coups : ", moves ,"epsilon = ", epsilon)
         episodes.append(e)
-        rewards.append(r/(max_itr_per_epoch))
+        rewards.append(r)
 
     print("Average reward = ", np.mean(rewards))
     plt.figure()
